@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bierpong Turnier</title>
+<style>
+:root{--bg:#0d1117;--card:#161c26;--card2:#1e2633;--line:#2f3a4c;--txt:#f3f6fa;--mut:#8d99ab;--acc:#ffb020;--acc2:#ff5d5d;--ok:#3ddc97;--zoom:1;--g:1.75rem}
+*{box-sizing:border-box}
+html{font-size:calc(16px*var(--zoom))}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#2a1d05 0,transparent 60%),var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button,input{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--line);background:rgba(13,17,23,.9);position:sticky;top:0;z-index:5;backdrop-filter:blur(8px);flex-wrap:wrap}
+.logo{font-size:1.5rem;font-weight:800;letter-spacing:.02em;margin-right:auto}
+.logo span{color:var(--acc)}
+.tabs{display:flex;gap:.4rem}
+.tab,.btn,.ib{border:1px solid var(--line);background:var(--card2);border-radius:.7rem;padding:.6rem 1.1rem;cursor:pointer;transition:.12s}
+.tab:hover,.btn:hover,.ib:hover{border-color:var(--acc)}
+.tab.on{background:var(--acc);color:#1b1200;border-color:var(--acc);font-weight:700}
+.ib{padding:.5rem .7rem;min-width:2.6rem}
+.btn.pri{background:var(--acc);color:#1b1200;border-color:var(--acc);font-weight:700}
+.btn.big{font-size:1.2rem;padding:.9rem 1.8rem}
+.btn.danger{border-color:#5a2a2a;color:#ff9b9b}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+main{padding:1.2rem;max-width:110rem;margin:0 auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1.1rem}
+.card h2,.card h3{margin:0 0 .8rem}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.mut{color:var(--mut)}
+input[type=text]{background:var(--bg);border:1px solid var(--line);border-radius:.7rem;padding:.65rem .9rem;flex:1;min-width:10rem;outline:none}
+input[type=text]:focus{border-color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0}
+.chip{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .5rem .45rem .9rem;border-radius:2rem;background:var(--card2);border:2px solid var(--line);cursor:pointer;user-select:none}
+.chip.sel{border-color:var(--acc);background:#3a2a07}
+.chip.used{opacity:.45;cursor:default}
+.chip i{font-style:normal;width:1.5rem;height:1.5rem;border-radius:50%;display:grid;place-items:center;background:#0003;font-size:.9rem}
+.chip i:hover{background:var(--acc2)}
+.teamlist{display:grid;gap:.5rem}
+.tm{display:flex;align-items:center;gap:.6rem;background:var(--card2);border-radius:.7rem;padding:.55rem .8rem;border:1px solid var(--line)}
+.tm b{flex:1;cursor:pointer}
+.tm .n{color:var(--mut);width:1.6rem}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.mode{border:2px solid var(--line);border-radius:1rem;padding:1.2rem;cursor:pointer;background:var(--card2)}
+.mode.on{border-color:var(--acc);background:#2b2006}
+.mode h3{margin:0 0 .4rem;font-size:1.4rem}
+.stepper{display:inline-flex;align-items:center;gap:.8rem;margin:.3rem 1.5rem .3rem 0}
+.stepper b{min-width:2ch;text-align:center;font-size:1.4rem}
+.stepper button{width:2.6rem;height:2.6rem;border-radius:50%;border:1px solid var(--line);background:var(--card2);cursor:pointer;font-size:1.3rem}
+.toolbar{display:flex;gap:.6rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.toolbar .sp{margin-left:auto}
+.champ{background:linear-gradient(90deg,#4a3207,#2b2006);border:2px solid var(--acc);border-radius:1rem;padding:1rem 1.5rem;margin-bottom:1rem;font-size:1.8rem;font-weight:800;text-align:center}
+.champ span{color:var(--acc)}
+.wrap{overflow:auto;padding-bottom:1rem}
+.bracket{display:flex;align-items:stretch;min-width:max-content;padding:.5rem 0}
+.round{display:flex;flex-direction:column;width:17rem;margin-right:var(--g)}
+.round.last{margin-right:0}
+.round h4{margin:0 0 .5rem;text-align:center;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;font-size:.9rem}
+.matches{flex:1;display:flex;flex-direction:column}
+.mw{flex:1;display:flex;align-items:center;position:relative;padding:.4rem 0}
+.match{position:relative;width:100%;background:var(--card);border:2px solid var(--line);border-radius:.8rem;overflow:hidden}
+.match.click{cursor:pointer}
+.match.click:hover{border-color:var(--acc)}
+.match.ready{border-color:var(--acc);box-shadow:0 0 0 3px #ffb02033}
+.match.bye{opacity:.5}
+.team{display:flex;justify-content:space-between;gap:.5rem;padding:.55rem .8rem;font-weight:600}
+.team+.team{border-top:1px solid var(--line)}
+.team.tbd{color:var(--mut);font-weight:400;font-style:italic}
+.team.win{background:#103a29;color:var(--ok)}
+.team.lose{color:var(--mut);text-decoration:line-through}
+.team b{background:#0004;border-radius:.4rem;padding:0 .45rem;min-width:1.6rem;text-align:center}
+.round:not(.last) .mw::after{content:"";position:absolute;right:calc(var(--g)/-2);width:calc(var(--g)/2);top:50%;border-top:2px solid var(--line)}
+.round:not(.last) .mw:nth-child(odd)::before{content:"";position:absolute;right:calc(var(--g)/-2);top:50%;height:100%;border-left:2px solid var(--line)}
+.round:not(.first) .match::before{content:"";position:absolute;left:calc(var(--g)/-2);width:calc(var(--g)/2);top:50%;border-top:2px solid var(--line)}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(26rem,1fr));gap:1.2rem}
+table{width:100%;border-collapse:collapse}
+th,td{padding:.45rem .5rem;text-align:center}
+th{color:var(--mut);font-weight:500;font-size:.85rem;border-bottom:1px solid var(--line)}
+td:nth-child(2),th:nth-child(2){text-align:left}
+tr.q td:first-child{box-shadow:inset 4px 0 var(--ok)}
+tr.q td{background:#0e2a1e}
+td.pts{font-weight:800;color:var(--acc)}
+.rl{color:var(--mut);font-size:.8rem;margin:.9rem 0 .3rem;text-transform:uppercase;letter-spacing:.08em}
+.gm{display:grid;grid-template-columns:1fr auto 1fr;gap:.6rem;align-items:center;background:var(--card2);border:2px solid var(--line);border-radius:.7rem;padding:.55rem .8rem;margin-bottom:.4rem;cursor:pointer}
+.gm:hover{border-color:var(--acc)}
+.gm.open{border-color:#6b4d10}
+.gm span:last-child{text-align:right}
+.gm .w{color:var(--ok);font-weight:700}
+.gm .l{color:var(--mut)}
+.gm em{font-style:normal;color:var(--mut);font-size:.9rem;min-width:3.5rem;text-align:center}
+#modal{position:fixed;inset:0;background:#000b;display:none;place-items:center;z-index:20;padding:1rem}
+#modal.on{display:grid}
+.dlg{background:var(--card);border:1px solid var(--line);border-radius:1.2rem;padding:1.5rem;width:min(38rem,100%)}
+.dlg h3{margin:0 0 1rem;text-align:center}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:1rem 0}
+.pick button{padding:1.4rem .8rem;font-size:1.3rem;font-weight:700;border-radius:1rem;border:2px solid var(--line);background:var(--card2);cursor:pointer}
+.pick button:hover{border-color:var(--ok);background:#103a29}
+.pick button.cur{border-color:var(--ok);background:#103a29}
+.cups{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;margin:.5rem 0 1rem}
+.cups button{width:2.8rem;height:2.8rem;border-radius:.6rem;border:2px solid var(--line);background:var(--card2);cursor:pointer;font-weight:700}
+.cups button.on{background:var(--acc);color:#1b1200;border-color:var(--acc)}
+#cf{position:fixed;inset:0;pointer-events:none;z-index:30;display:none}
+.hint{color:var(--mut);font-size:.9rem;margin:.6rem 0 0}
+footer{color:var(--mut);text-align:center;padding:1.5rem;font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🍺 Bierpong <span>Turnier</span></div>
+  <div class="tabs">
+    <button class="tab" data-a="tab" data-v="teams" id="t-teams">👥 Teams</button>
+    <button class="tab" data-a="tab" data-v="turnier" id="t-turnier">🏆 Turnier</button>
+  </div>
+  <button class="ib" data-a="zoom" data-v="-0.1" title="Kleiner">A−</button>
+  <button class="ib" data-a="zoom" data-v="0.1" title="Größer">A+</button>
+  <button class="ib" data-a="fs" title="Vollbild">⛶</button>
+  <button class="ib" data-a="menu" title="Daten">⚙</button>
+</header>
+<main id="app"></main>
+<footer>Daten werden auf diesem Gerät/Browser gespeichert.</footer>
+<div id="modal"></div>
+<canvas id="cf"></canvas>
+<input type="file" id="imp" accept=".json" hidden>
+
+<script>
+const KEY='bierpong-v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let _u=Date.now();const uid=()=>'i'+(_u++).toString(36);
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a};
+const DEF={players:[],teams:[],setup:{mode:'ko',groups:2,advance:2},t:null,tab:'teams',zoom:1};
+let S;try{S={...DEF,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{S={...DEF}}
+let sel=[];      // ausgewählte Spieler (manuelle Teams)
+let M=null;      // offenes Modal
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}};
+const tn=id=>(S.t&&S.t.names[id])||'?';
+const usedIds=()=>new Set(S.teams.flatMap(t=>t.p));
+const pname=id=>(S.players.find(p=>p.id===id)||{}).name||'?';
+
+/* ---------- Turnierlogik ---------- */
+function seedOrder(size){let o=[1];while(o.length<size){const m=o.length*2+1;o=o.flatMap(x=>[x,m-x]);}return o}
+function makeKo(seeds){
+  let size=2;while(size<seeds.length)size*=2;
+  const slots=seedOrder(size).map(s=>seeds[s-1]??null);
+  const res=[];for(let n=size/2;n>=1;n/=2)res.push(Array.from({length:n},()=>({w:null,c:1})));
+  return {slots,res};
+}
+function resolveKo(ko){
+  const size=ko.slots.length,R=[];let prev=null;
+  for(let r=0,n=size/2;n>=1;r++,n/=2){
+    const row=[];
+    for(let i=0;i<n;i++){
+      const a=r===0?ko.slots[2*i]:prev[2*i].win, b=r===0?ko.slots[2*i+1]:prev[2*i+1].win;
+      const res=ko.res[r][i], bye=r===0&&(!a||!b);
+      let win=null;
+      if(bye)win=a||b||null;
+      else if(a&&b&&(res.w===a||res.w===b))win=res.w;
+      row.push({r,i,a,b,bye,win,c:res.c});
+    }
+    R.push(row);prev=row;
+  }
+  return R;
+}
+const champion=ko=>{const R=resolveKo(ko);return R[R.length-1][0].win};
+function roundRobin(ids){
+  const a=[...ids];if(a.length%2)a.push(null);
+  const n=a.length,out=[];
+  for(let r=0;r<n-1;r++){
+    for(let i=0;i<n/2;i++){const x=a[i],y=a[n-1-i];if(x&&y)out.push({id:uid(),r:r+1,a:r%2?y:x,b:r%2?x:y,w:null,c:1});}
+    a.splice(1,0,a.pop());
+  }
+  return out;
+}
+function standings(g){
+  const st={};g.teams.forEach(id=>st[id]={id,p:0,w:0,l:0,cd:0,cf:0,pts:0});
+  g.matches.forEach(m=>{if(!m.w)return;const l=m.w===m.a?m.b:m.a,w=st[m.w];
+    w.p++;w.w++;w.pts+=3;w.cd+=m.c;w.cf+=m.c;const x=st[l];x.p++;x.l++;x.cd-=m.c;});
+  return Object.values(st).sort((x,y)=>y.pts-x.pts||y.cd-x.cd||y.cf-x.cf||tn(x.id).localeCompare(tn(y.id)));
+}
+function startT(){
+  const ids=S.teams.map(t=>t.id),n=ids.length;
+  if(n<2)return alert('Mindestens 2 Teams nötig.');
+  const t={mode:S.setup.mode,names:Object.fromEntries(S.teams.map(x=>[x.id,x.name])),view:'ko'};
+  if(t.mode==='ko'){t.stage='ko';t.ko=makeKo(shuffle(ids));}
+  else{
+    const g=Math.max(1,Math.min(S.setup.groups,Math.floor(n/2)));
+    const buckets=Array.from({length:g},()=>[]);
+    shuffle(ids).forEach((id,i)=>{const row=i/g|0,k=i%g;buckets[row%2?g-1-k:k].push(id)});
+    t.groups=buckets.map((teams,i)=>({name:'Gruppe '+String.fromCharCode(65+i),teams,matches:roundRobin(teams)}));
+    t.minSize=Math.min(...buckets.map(b=>b.length));
+    t.adv=Math.max(1,Math.min(S.setup.advance,t.minSize));
+    t.stage='group';t.view='group';
+  }
+  S.t=t;S.tab='turnier';save();render();
+}
+function toKo(){
+  const t=S.t,lists=t.groups.map(g=>standings(g).map(s=>s.id)),seeds=[];
+  for(let k=0;k<t.adv;k++)lists.forEach(l=>{if(l[k])seeds.push(l[k])});
+  t.ko=makeKo(seeds);t.stage='ko';t.view='ko';save();render();
+}
+
+/* ---------- Aktionen ---------- */
+const A={
+  tab(d){S.tab=d.v;save();render()},
+  addPlayers(){
+    const el=$('#pin');if(!el)return;
+    el.value.split(/[,;\n]/).map(s=>s.trim()).filter(Boolean).forEach(name=>S.players.push({id:uid(),name}));
+    save();render();$('#pin').focus();
+  },
+  selP(d){if(usedIds().has(d.id))return;sel=sel.includes(d.id)?sel.filter(x=>x!==d.id):[...sel,d.id].slice(-2);render()},
+  delP(d,e){e.stopPropagation();
+    const tm=S.teams.find(t=>t.p.includes(d.id));
+    if(tm&&!confirm('Spieler steckt in Team "'+tm.name+'". Team wird aufgelöst. Fortfahren?'))return;
+    S.teams=S.teams.filter(t=>t!==tm);S.players=S.players.filter(p=>p.id!==d.id);sel=sel.filter(x=>x!==d.id);save();render()},
+  makeTeam(){if(sel.length!==2)return;S.teams.push({id:uid(),p:[...sel],name:sel.map(pname).join(' & ')});sel=[];save();render()},
+  randomTeams(){
+    const free=shuffle(S.players.map(p=>p.id).filter(id=>!usedIds().has(id)));
+    while(free.length>=2){const p=[free.pop(),free.pop()];S.teams.push({id:uid(),p,name:p.map(pname).join(' & ')})}
+    sel=[];save();render();
+  },
+  delT(d){S.teams=S.teams.filter(t=>t.id!==d.id);save();render()},
+  clearT(){if(S.teams.length&&confirm('Alle Teams auflösen?')){S.teams=[];sel=[];save();render()}},
+  rename(d){const t=S.teams.find(x=>x.id===d.id);
+    M={type:'rename',id:d.id};
+    $('#modal').innerHTML=`<div class="dlg"><h3>Teamname</h3><div class="row"><input type="text" id="rn" value="${esc(t.name)}"></div>
+    <div class="row" style="justify-content:center;margin-top:1rem"><button class="btn" data-a="close">Abbrechen</button><button class="btn pri" data-a="doRename">Speichern</button></div></div>`;
+    $('#modal').classList.add('on');const i=$('#rn');i.focus();i.select();},
+  doRename(){const v=$('#rn').value.trim();const t=S.teams.find(x=>x.id===M.id);if(v&&t)t.name=v;save();A.close();render()},
+  mode(d){S.setup.mode=d.v;save();render()},
+  step(d){const lim={groups:[1,8],advance:[1,4]}[d.f];S.setup[d.f]=Math.max(lim[0],Math.min(lim[1],S.setup[d.f]+ +d.v));save();render()},
+  start(){startT()},
+  endT(){if(confirm('Turnier beenden und verwerfen? Spieler und Teams bleiben erhalten.')){S.t=null;save();render()}},
+  view(d){S.t.view=d.v;save();render()},
+  toKo(){
+    const open=S.t.groups.some(g=>g.matches.some(m=>!m.w));
+    if(open&&!confirm('Es sind noch nicht alle Gruppenspiele gespielt. Trotzdem K.o.-Phase starten?'))return;
+    toKo();
+  },
+  open(d){
+    let a,b,c=1,cur=null;
+    if(d.k==='ko'){const m=resolveKo(S.t.ko)[+d.r][+d.i];a=m.a;b=m.b;cur=m.win;c=m.c}
+    else{const m=S.t.groups[+d.g].matches.find(x=>x.id===d.id);a=m.a;b=m.b;cur=m.w;c=m.c}
+    M={type:'match',...d,a,b,cur,c};drawMatch();
+  },
+  cups(d){M.c=+d.v;drawMatch()},
+  win(d){
+    const t=S.t,before=t.ko?champion(t.ko):null;
+    if(M.k==='ko')t.ko.res[+M.r][+M.i]={w:d.id,c:M.c};
+    else{const m=t.groups[+M.g].matches.find(x=>x.id===M.id);m.w=d.id;m.c=M.c}
+    save();A.close();render();
+    if(t.ko&&!before&&champion(t.ko))confetti();
+  },
+  clr(){
+    if(M.k==='ko')S.t.ko.res[+M.r][+M.i]={w:null,c:1};
+    else{const m=S.t.groups[+M.g].matches.find(x=>x.id===M.id);m.w=null;m.c=1}
+    save();A.close();render();
+  },
+  close(){M=null;$('#modal').classList.remove('on')},
+  zoom(d){S.zoom=Math.max(.6,Math.min(2.2,+(S.zoom+ +d.v).toFixed(2)));save();render()},
+  fs(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})},
+  menu(){
+    M={type:'menu'};
+    $('#modal').innerHTML=`<div class="dlg"><h3>Daten</h3><div class="row" style="justify-content:center">
+    <button class="btn" data-a="export">⬇ Exportieren</button><button class="btn" data-a="import">⬆ Importieren</button>
+    <button class="btn danger" data-a="reset">Alles löschen</button></div>
+    <p class="hint" style="text-align:center">Export/Import überträgt den Stand auf ein anderes Gerät.</p>
+    <div class="row" style="justify-content:center;margin-top:1rem"><button class="btn" data-a="close">Schließen</button></div></div>`;
+    $('#modal').classList.add('on');
+  },
+  export(){const b=new Blob([JSON.stringify(S)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bierpong-turnier.json';a.click()},
+  import(){$('#imp').click()},
+  reset(){if(confirm('Wirklich ALLES löschen (Spieler, Teams, Turnier)?')){S={...DEF,zoom:S.zoom};sel=[];save();A.close();render()}}
+};
+document.addEventListener('click',e=>{
+  if(e.target.id==='modal')return A.close();
+  const el=e.target.closest('[data-a]');if(!el)return;
+  A[el.dataset.a]?.(el.dataset,e);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){if(e.target.id==='pin')A.addPlayers();if(e.target.id==='rn')A.doRename()}
+  if(e.key==='Escape')A.close();
+});
+$('#imp').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  f.text().then(x=>{try{S={...DEF,...JSON.parse(x)};save();A.close();render()}catch{alert('Datei ungültig.')}});
+  e.target.value='';
+});
+
+/* ---------- Darstellung ---------- */
+function drawMatch(){
+  $('#modal').innerHTML=`<div class="dlg"><h3>Wer hat gewonnen?</h3>
+  <div class="mut" style="text-align:center">Übrige Becher des Siegers</div>
+  <div class="cups">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="${M.c===n?'on':''}" data-a="cups" data-v="${n}">${n}</button>`).join('')}</div>
+  <div class="pick">${[M.a,M.b].map(id=>`<button class="${M.cur===id?'cur':''}" data-a="win" data-id="${id}">${esc(tn(id))}</button>`).join('')}</div>
+  <div class="row" style="justify-content:center"><button class="btn" data-a="close">Abbrechen</button>${M.cur?'<button class="btn danger" data-a="clr">Ergebnis löschen</button>':''}</div></div>`;
+  $('#modal').classList.add('on');
+}
+function viewTeams(){
+  const used=usedIds(),free=S.players.filter(p=>!used.has(p.id));
+  return `<div class="grid2">
+  <div class="card"><h2>Spieler-Pool <span class="mut">(${S.players.length})</span></h2>
+    <div class="row"><input type="text" id="pin" placeholder="Name eingeben (mehrere mit Komma)" autocomplete="off"><button class="btn pri" data-a="addPlayers">Hinzufügen</button></div>
+    <div class="chips">${S.players.map(p=>{const u=used.has(p.id);return `<span class="chip ${u?'used':''} ${sel.includes(p.id)?'sel':''}" data-a="selP" data-id="${p.id}">${u?'✓ ':''}${esc(p.name)}<i data-a="delP" data-id="${p.id}">×</i></span>`}).join('')||'<span class="mut">Noch keine Spieler.</span>'}</div>
+    <div class="row">
+      <button class="btn pri" data-a="randomTeams" ${free.length<2?'disabled':''}>🎲 Zufällige Teams (${free.length} frei)</button>
+      <button class="btn" data-a="makeTeam" ${sel.length!==2?'disabled':''}>Auswahl als Team (${sel.length}/2)</button>
+    </div>
+    <p class="hint">Manuell: zwei Spieler antippen → „Auswahl als Team“. Zufällig: bildet aus allen freien Spielern Paare${free.length%2?' – ein Spieler bleibt übrig.':'.'}</p>
+  </div>
+  <div class="card"><h2>Teams <span class="mut">(${S.teams.length})</span></h2>
+    <div class="teamlist">${S.teams.map((t,i)=>`<div class="tm"><span class="n">${i+1}</span><b data-a="rename" data-id="${t.id}" title="Zum Umbenennen tippen">${esc(t.name)}</b><span class="mut">✎</span><button class="ib" data-a="delT" data-id="${t.id}">×</button></div>`).join('')||'<span class="mut">Noch keine Teams.</span>'}</div>
+    <div class="row" style="margin-top:1rem"><button class="btn" data-a="clearT" ${S.teams.length?'':'disabled'}>Alle auflösen</button>
+    <button class="btn pri sp" data-a="tab" data-v="turnier" ${S.teams.length<2?'disabled':''} style="margin-left:auto">Weiter zum Turnier →</button></div>
+    ${S.t?'<p class="hint">Ein Turnier läuft – Änderungen hier wirken erst bei einem neuen Turnier.</p>':''}
+  </div></div>`;
+}
+function setupHtml(){
+  const n=S.teams.length,st=S.setup,g=Math.max(1,Math.min(st.groups,Math.floor(n/2))),per=n?Math.ceil(n/g):0;
+  const adv=Math.max(1,Math.min(st.advance,Math.floor(n/g)||1));
+  return `<div class="card"><h2>Neues Turnier – ${n} Teams</h2>
+  <div class="modes">
+    <div class="mode ${st.mode==='ko'?'on':''}" data-a="mode" data-v="ko"><h3>🏆 K.o.-System</h3><div class="mut">Klassischer Turnierbaum. Wer verliert, ist raus. Bei ungeraden Zahlen gibt es Freilose.</div></div>
+    <div class="mode ${st.mode==='group'?'on':''}" data-a="mode" data-v="group"><h3>📊 Gruppenphase</h3><div class="mut">Jeder gegen jeden in Gruppen, danach K.o.-Runde mit den Besten.</div></div>
+  </div>
+  ${st.mode==='group'?`<div class="row"><span class="stepper"><span>Gruppen</span><button data-a="step" data-f="groups" data-v="-1">−</button><b>${g}</b><button data-a="step" data-f="groups" data-v="1">+</button></span>
+  <span class="stepper"><span>Weiter pro Gruppe</span><button data-a="step" data-f="advance" data-v="-1">−</button><b>${adv}</b><button data-a="step" data-f="advance" data-v="1">+</button></span></div>
+  <p class="hint">${n} Teams → ${g} Gruppe(n) mit je ca. ${per} Teams, die besten ${adv} pro Gruppe erreichen die K.o.-Runde (${adv*g} Teams).</p>`:''}
+  <div class="row" style="margin-top:1rem"><button class="btn pri big" data-a="start" ${n<2?'disabled':''}>🍺 Turnier starten (zufällige Auslosung)</button></div>
+  ${n<2?'<p class="hint">Erst im Tab „Teams“ mindestens 2 Teams anlegen.</p>':''}</div>`;
+}
+function bracketHtml(ko){
+  const R=resolveKo(ko),nR=R.length;
+  const nm=r=>{const l=nR-r;return l===1?'Finale':l===2?'Halbfinale':l===3?'Viertelfinale':l===4?'Achtelfinale':'Runde '+(r+1)};
+  const champ=R[nR-1][0].win;
+  const side=(m,id)=>{
+    const c=['team'];if(!id)c.push('tbd');if(m.win&&m.win===id)c.push('win');else if(m.win&&id)c.push('lose');
+    return `<div class="${c.join(' ')}"><span>${id?esc(tn(id)):(m.bye?'Freilos':'—')}</span>${m.win===id&&id&&!m.bye?`<b title="Übrige Becher">${m.c}</b>`:''}</div>`;
+  };
+  return `${champ?`<div class="champ">🏆 Turniersieger: <span>${esc(tn(champ))}</span></div>`:''}
+  <div class="wrap"><div class="bracket">${R.map((row,r)=>`<div class="round ${r===0?'first':''} ${r===nR-1?'last':''}"><h4>${nm(r)}</h4><div class="matches">${row.map(m=>{
+    const can=m.a&&m.b&&!m.bye;
+    return `<div class="mw"><div class="match ${can?'click':''} ${can&&!m.win?'ready':''} ${m.bye?'bye':''}" ${can?`data-a="open" data-k="ko" data-r="${m.r}" data-i="${m.i}"`:''}>${side(m,m.a)}${side(m,m.b)}</div></div>`}).join('')}</div></div>`).join('')}</div></div>
+  <p class="hint">Spiel antippen, um das Ergebnis einzutragen. Die Zahl neben dem Sieger = übrige Becher.</p>`;
+}
+function groupsHtml(t){
+  const done=t.groups.every(g=>g.matches.every(m=>m.w));
+  return `<div class="groups">${t.groups.map((g,gi)=>{
+    const st=standings(g),rounds={};g.matches.forEach(m=>(rounds[m.r]??=[]).push(m));
+    return `<div class="card"><h3>${g.name}</h3>
+    <table><tr><th>#</th><th>Team</th><th>Sp</th><th>S</th><th>N</th><th>Becher ±</th><th>Pkt</th></tr>
+    ${st.map((s,i)=>`<tr class="${i<t.adv?'q':''}"><td>${i+1}</td><td>${esc(tn(s.id))}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.cd>0?'+':''}${s.cd}</td><td class="pts">${s.pts}</td></tr>`).join('')}</table>
+    ${Object.entries(rounds).map(([r,ms])=>`<div class="rl">Runde ${r}</div>${ms.map(m=>`<div class="gm ${m.w?'':'open'}" data-a="open" data-k="grp" data-g="${gi}" data-id="${m.id}">
+      <span class="${m.w?(m.w===m.a?'w':'l'):''}">${esc(tn(m.a))}</span><em>${m.w?(m.w===m.a?m.c+' : 0':'0 : '+m.c):'vs'}</em><span class="${m.w?(m.w===m.b?'w':'l'):''}">${esc(tn(m.b))}</span></div>`).join('')}`).join('')}
+    </div>`}).join('')}</div>
+  ${t.stage==='group'?`<div class="row" style="margin-top:1.2rem"><button class="btn pri big" data-a="toKo">${done?'':'⚠ '}K.o.-Phase starten →</button><span class="mut">Grün markiert = kommen weiter · Siege 3 Pkt., Becher ± = übrige Becher des Siegers</span></div>`:''}`;
+}
+function viewTurnier(){
+  const t=S.t;if(!t)return setupHtml();
+  let body;
+  if(t.mode==='group'){
+    body=`<div class="toolbar"><button class="tab ${t.view==='group'?'on':''}" data-a="view" data-v="group">📊 Gruppenphase</button>
+    <button class="tab ${t.view==='ko'?'on':''}" data-a="view" data-v="ko" ${t.ko?'':'disabled'}>🏆 K.o.-Runde</button><button class="btn danger sp" data-a="endT">Turnier beenden</button></div>
+    ${t.view==='ko'&&t.ko?bracketHtml(t.ko):groupsHtml(t)}`;
+  }else body=`<div class="toolbar"><b style="font-size:1.3rem">K.o.-Turnier</b><button class="btn danger sp" data-a="endT">Turnier beenden</button></div>${bracketHtml(t.ko)}`;
+  return body;
+}
+function render(){
+  document.documentElement.style.setProperty('--zoom',S.zoom);
+  $('#t-teams').classList.toggle('on',S.tab==='teams');
+  $('#t-turnier').classList.toggle('on',S.tab==='turnier');
+  const w=document.querySelector('.wrap'),sx=w?w.scrollLeft:0,sy=w?w.scrollTop:0,py=scrollY;
+  $('#app').innerHTML=S.tab==='teams'?viewTeams():viewTurnier();
+  const w2=document.querySelector('.wrap');if(w2){w2.scrollLeft=sx;w2.scrollTop=sy}
+  scrollTo(0,py);
+}
+function confetti(){
+  const c=$('#cf'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;c.style.display='block';
+  const P=Array.from({length:200},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:Math.random()*4-2,vy:2+Math.random()*4,s:6+Math.random()*8,col:`hsl(${Math.random()*360} 90% 60%)`,r:Math.random()*6}));
+  let f=0;(function tick(){x.clearRect(0,0,c.width,c.height);
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.col;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
+    if(++f<320)requestAnimationFrame(tick);else c.style.display='none'})();
+}
+render();
+</script>
+</body>
+</html>
