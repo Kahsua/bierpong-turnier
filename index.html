@@ -213,10 +213,11 @@ const A={
     const tm=S.teams.find(t=>t.p.includes(d.id));
     if(tm&&!confirm('Spieler steckt in Team "'+tm.name+'". Team wird aufgelöst. Fortfahren?'))return;
     S.teams=S.teams.filter(t=>t!==tm);S.players=S.players.filter(p=>p.id!==d.id);sel=sel.filter(x=>x!==d.id);save();render()},
-  makeTeam(){if(sel.length!==2)return;S.teams.push({id:uid(),p:[...sel],name:sel.map(pname).join(' & ')});sel=[];save();render()},
+  makeTeam(){if(sel.length<1)return;S.teams.push({id:uid(),p:[...sel],name:sel.map(pname).join(' & ')});sel=[];save();render()},
   randomTeams(){
     const free=shuffle(S.players.map(p=>p.id).filter(id=>!usedIds().has(id)));
     while(free.length>=2){const p=[free.pop(),free.pop()];S.teams.push({id:uid(),p,name:p.map(pname).join(' & ')})}
+    if(free.length===1){const p=[free.pop()];S.teams.push({id:uid(),p,name:pname(p[0])})}
     sel=[];save();render();
   },
   delT(d){S.teams=S.teams.filter(t=>t.id!==d.id);save();render()},
@@ -303,10 +304,10 @@ function viewTeams(){
     <div class="row"><input type="text" id="pin" placeholder="Name eingeben (mehrere mit Komma)" autocomplete="off"><button class="btn pri" data-a="addPlayers">Hinzufügen</button></div>
     <div class="chips">${S.players.map(p=>{const u=used.has(p.id);return `<span class="chip ${u?'used':''} ${sel.includes(p.id)?'sel':''}" data-a="selP" data-id="${p.id}">${u?'✓ ':''}${esc(p.name)}<i data-a="delP" data-id="${p.id}">×</i></span>`}).join('')||'<span class="mut">Noch keine Spieler.</span>'}</div>
     <div class="row">
-      <button class="btn pri" data-a="randomTeams" ${free.length<2?'disabled':''}>🎲 Zufällige Teams (${free.length} frei)</button>
-      <button class="btn" data-a="makeTeam" ${sel.length!==2?'disabled':''}>Auswahl als Team (${sel.length}/2)</button>
+      <button class="btn pri" data-a="randomTeams" ${free.length<1?'disabled':''}>🎲 Zufällige Teams (${free.length} frei)</button>
+      <button class="btn" data-a="makeTeam" ${sel.length<1?'disabled':''}>${sel.length===1?'Auswahl als Einzel-Team':'Auswahl als Team'} (${sel.length}/2)</button>
     </div>
-    <p class="hint">Manuell: zwei Spieler antippen → „Auswahl als Team“. Zufällig: bildet aus allen freien Spielern Paare${free.length%2?' – ein Spieler bleibt übrig.':'.'}</p>
+    <p class="hint">Manuell: einen oder zwei Spieler antippen → „Auswahl als Team“ (einer = Einzelspieler-Team). Zufällig: bildet Paare aus allen freien Spielern${free.length%2?' – der übrige Spieler spielt allein.':'.'}</p>
   </div>
   <div class="card"><h2>Teams <span class="mut">(${S.teams.length})</span></h2>
     <div class="teamlist">${S.teams.map((t,i)=>`<div class="tm"><span class="n">${i+1}</span><b data-a="rename" data-id="${t.id}" title="Zum Umbenennen tippen">${esc(t.name)}</b><span class="mut">✎</span><button class="ib" data-a="delT" data-id="${t.id}">×</button></div>`).join('')||'<span class="mut">Noch keine Teams.</span>'}</div>
